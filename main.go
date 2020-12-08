@@ -8,12 +8,16 @@ import (
 )
 
 func main() {
-	server := socketio.NewServer(nil)
-	// sockets
-	server.OnConnect("connection", func(so socketio.Conn) error {
-		log.Println("A new user connected")
-		so.Join("chat_room")
+	server, err := socketio.NewServer(nil)
 
+	if err != nil {
+		log.Fatal(err)
+	}
+	// sockets
+	server.On("connection", func(so socketio.Socket) {
+		log.Println("A new user connected")
+
+		so.Join("chat_room")
 		so.On("chat message", func(msg string) {
 			log.Println("emit: ", so.Emit("chat message", msg))
 			so.BroadcastTo("chat_room", "chat message", msg)
